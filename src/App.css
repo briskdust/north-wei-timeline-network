@@ -1,0 +1,304 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.App::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(120, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(120, 219, 255, 0.2) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+/* 美化滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #5a6fd8, #6a4190);
+}
+
+/* 全局卡片样式美化 */
+.ant-card {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15) !important;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.05) 0%,
+    rgba(118, 75, 162, 0.05) 100%
+  ) !important;
+}
+
+.ant-card-head-title {
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+}
+
+/* 搜索框美化 */
+.ant-input-affix-wrapper {
+  border-radius: 12px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: #667eea !important;
+  box-shadow: 0 4px 24px rgba(102, 126, 234, 0.25) !important;
+}
+
+.ant-input {
+  background: transparent !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+/* 按钮美化 */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+  background: linear-gradient(135deg, #5a6fd8, #6a4190) !important;
+}
+
+.ant-btn {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* 时间线美化 */
+.ant-timeline {
+  margin-top: 24px !important;
+}
+
+.ant-timeline-item-tail {
+  border-left: 2px solid #e8e8f0 !important;
+}
+
+.ant-timeline-item-head {
+  border-radius: 50% !important;
+  border-width: 2px !important;
+}
+
+/* 列表美化 */
+.ant-list-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  padding: 16px 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-list-item:hover {
+  background: rgba(102, 126, 234, 0.02) !important;
+  border-radius: 8px !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* 标签美化 */
+.ant-tag {
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  color: white !important;
+}
+
+/* 标题美化 */
+.app-title {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.app-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+/* 渐变文本 */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 玻璃态效果 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%,
+  43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+.bounce-hover:hover {
+  animation: bounce 1s ease-in-out;
+}
+
+/* 强制全宽样式类 */
+.full-width-container {
+  width: 100% !important;
+  max-width: none !important;
+  padding-left: 2% !important;
+  padding-right: 2% !important;
+}
+
+/* 强制全局全宽覆盖 */
+* {
+  max-width: none !important;
+}
+
+.ant-app,
+.ant-app > div,
+[data-reactroot],
+[data-reactroot] > div,
+.container,
+.ant-layout,
+.ant-layout-content,
+div[class*="container"],
+div[class*="wrapper"] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.ant-layout {
+  width: 100% !important;
+}
+
+.ant-layout-content {
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* 移除可能的边距限制 */
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+#root {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
