@@ -45,12 +45,12 @@ src/
 │   ├── SearchPage.tsx   # 搜索页面
 │   ├── TimelinePage.tsx # 时间线页面
 │   └── NetworkPage.tsx  # 关系网页面
-├── data/               # 数据文件
-│   └── mockData.ts     # 模拟数据
-├── types/              # TypeScript类型定义
-│   └── Person.ts       # 人物相关类型
-├── App.tsx             # 主应用组件
-└── main.tsx           # 应用入口
+├── data/                # 数据文件
+│   └── mockData.ts      # 模拟数据
+├── types/               # TypeScript类型定义
+│   └── Person.ts        # 人物相关类型
+├── App.tsx              # 主应用组件
+└── main.tsx             # 应用入口
 ```
 
 ## 使用说明
