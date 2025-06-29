@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input, Card, List, Typography, Space } from "antd";
 import { Search, User, Calendar, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { searchPersons } from "../data/mockData";
+import { searchPersons } from "../services/api";
 import type { Person } from "../types/index";
 
 const { Title, Text } = Typography;
@@ -12,9 +12,9 @@ const SearchPage: React.FC = () => {
   const [results, setResults] = useState<Person[]>([]);
   const navigate = useNavigate();
 
-  const handleSearch = (value: string) => {
+  const handleSearch = async (value: string) => {
     setQuery(value);
-    const searchResults = searchPersons(value);
+    const searchResults = await searchPersons(value);
     setResults(searchResults);
   };
 
