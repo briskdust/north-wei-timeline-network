@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    container_name: beiwei_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-beiwei_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-beiwei_password}
+      POSTGRES_DB: ${POSTGRES_DB:-beiwei_history}
+      # 设置PostgreSQL配置
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # 自动初始化数据库脚本
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed_data.sql:/docker-entrypoint-initdb.d/02-seed_data.sql
+      # PostgreSQL配置文件
+      - ./database/postgresql.conf:/etc/postgresql/postgresql.conf
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-beiwei_user} -d ${POSTGRES_DB:-beiwei_history}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - beiwei_network
+
+  # 可选：添加pgAdmin管理界面
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    container_name: beiwei_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@beiwei.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "${PGADMIN_PORT:-8080}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - beiwei_network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  beiwei_network:
+    driver: bridge

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Card, Typography, Button, Space, List, Spin } from "antd";
+import React, { useEffect, useRef } from "react";
+import { Card, Typography, Button, Space, List } from "antd";
 import { ArrowLeft, Users, User, Network as NetworkIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Network } from "vis-network";
@@ -9,7 +9,7 @@ import {
   getPersonRelationships,
   getAllPersons,
 } from "../services/api";
-import type { NetworkNode, NetworkEdge, Relationship, Person } from "../types/index";
+import type { NetworkNode, NetworkEdge, Relationship } from "../types/index";
 
 const { Title, Text } = Typography;
 
@@ -18,51 +18,11 @@ const NetworkPage: React.FC = () => {
   const navigate = useNavigate();
   const networkRef = useRef<HTMLDivElement>(null);
   const networkInstance = useRef<Network | null>(null);
-  
-  // 使用state来管理数据
-  const [person, setPerson] = useState<Person | null>(null);
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
-  const [allPeople, setAllPeople] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const person = id ? getPersonById(id) : null;
+  const relationships = id ? getPersonRelationships(id) : [];
 
-  // 异步加载数据
   useEffect(() => {
-    const loadData = async () => {
-      if (!id) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const [personData, relationshipsData, allPeopleData] = await Promise.all([
-          getPersonById(id),
-          getPersonRelationships(id),
-          getAllPersons()
-        ]);
-        
-        if (!personData) {
-          setError("未找到该人物信息");
-          return;
-        }
-        
-        setPerson(personData);
-        setRelationships(relationshipsData);
-        setAllPeople(allPeopleData);
-      } catch (err) {
-        console.error('加载数据失败:', err);
-        setError("加载数据失败");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [id]);
-
-  // 创建网络图
-  useEffect(() => {
-    if (!person || !relationships || !allPeople || !networkRef.current) return;
+    if (!person || !networkRef.current) return;
 
     // 准备节点数据
     const nodes: NetworkNode[] = [
@@ -79,7 +39,7 @@ const NetworkPage: React.FC = () => {
     relationships.forEach(rel => {
       const targetPersonId =
         rel.person1Id === person.id ? rel.person2Id : rel.person1Id;
-      const targetPerson = allPeople.find(p => p.id === targetPersonId);
+      const targetPerson = people.find(p => p.id === targetPersonId);
 
       if (targetPerson) {
         nodes.push({
@@ -202,34 +162,9 @@ const NetworkPage: React.FC = () => {
         networkInstance.current = null;
       }
     };
-  }, [person, relationships, allPeople, navigate]);
+  }, [person, relationships, navigate]);
 
-  // 加载状态
-  if (loading) {
-    return (
-      <div
-        style={{
-          padding: "80px 24px",
-          textAlign: "center",
-          background: "rgba(255, 255, 255, 0.1)",
-          borderRadius: "16px",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          margin: "80px auto",
-          maxWidth: "500px",
-        }}
-      >
-        <Spin size="large" />
-        <br />
-        <Text style={{ fontSize: "18px", color: "rgba(255, 255, 255, 0.8)", marginTop: "16px" }}>
-          正在加载关系网络...
-        </Text>
-      </div>
-    );
-  }
-
-  // 错误状态
-  if (error || !person) {
+  if (!person) {
     return (
       <div
         style={{
@@ -244,7 +179,7 @@ const NetworkPage: React.FC = () => {
         }}
       >
         <Text style={{ fontSize: "18px", color: "rgba(255, 255, 255, 0.8)" }}>
-          {error || "未找到该人物信息"}
+          未找到该人物信息
         </Text>
         <br />
         <Button
@@ -260,20 +195,9 @@ const NetworkPage: React.FC = () => {
   }
 
   const handlePersonClick = (targetPersonId: string) => {
+    console.log("点击人物，targetPersonId:", targetPersonId);
     navigate(`/person/${targetPersonId}`);
   };
-
-  // 获取关系人物列表
-  const getRelatedPeople = () => {
-    return relationships.map(rel => {
-      const targetPersonId =
-        rel.person1Id === person.id ? rel.person2Id : rel.person1Id;
-      const targetPerson = allPeople.find(p => p.id === targetPersonId);
-      return { relationship: rel, person: targetPerson };
-    }).filter(item => item.person);
-  };
-
-  const relatedPeople = getRelatedPeople();
 
   return (
     <div
@@ -293,7 +217,7 @@ const NetworkPage: React.FC = () => {
           <div>
             <Button
               icon={<ArrowLeft size={18} />}
-              onClick={() => navigate("/")}
+              onClick={() => navigate(`/person/${person.id}`)}
               style={{
                 marginBottom: "24px",
                 background: "rgba(255, 255, 255, 0.1)",
@@ -302,7 +226,7 @@ const NetworkPage: React.FC = () => {
               }}
               size="large"
             >
-              返回搜索
+              返回时间线
             </Button>
 
             <Card
@@ -310,7 +234,7 @@ const NetworkPage: React.FC = () => {
                 background:
                   "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)",
                 overflow: "hidden",
-                marginBottom: "32px",
+                marginBottom: "24px",
               }}
               bodyStyle={{ padding: "32px" }}
             >
@@ -319,7 +243,7 @@ const NetworkPage: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: "24px",
-                  marginBottom: "24px",
+                  flexWrap: "wrap",
                 }}
               >
                 <div
@@ -332,15 +256,18 @@ const NetworkPage: React.FC = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     boxShadow: "0 8px 24px rgba(102, 126, 234, 0.3)",
+                    flexShrink: 0,
                   }}
                 >
                   <NetworkIcon size={36} color="white" />
                 </div>
-                <div>
+
+                <div style={{ flex: 1 }}>
                   <Title
                     level={2}
                     style={{
                       margin: 0,
+                      marginBottom: "8px",
                       background: "linear-gradient(135deg, #667eea, #764ba2)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
@@ -350,37 +277,61 @@ const NetworkPage: React.FC = () => {
                     {person.name} 的关系网络
                   </Title>
                   <Text style={{ fontSize: "16px", color: "#666" }}>
-                    探索历史人物之间的复杂关系
+                    点击网络中的人物节点可跳转到对应页面
                   </Text>
                 </div>
               </div>
             </Card>
           </div>
 
+          {/* 响应式布局 */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr",
-              gap: "32px",
-              alignItems: "start",
+              display: "flex",
+              gap: "24px",
+              flexDirection: window.innerWidth > 1200 ? "row" : "column",
             }}
           >
-            {/* 关系网络图 */}
+            {/* 网络图 */}
             <Card
+              title={
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <Users size={24} style={{ color: "#667eea" }} />
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #667eea, #764ba2)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      fontSize: "20px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    关系网络图
+                  </span>
+                </div>
+              }
               style={{
+                flex: window.innerWidth > 1200 ? "2" : "1",
                 background:
                   "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)",
-                overflow: "hidden",
-                minHeight: "600px",
               }}
-              bodyStyle={{ padding: 0 }}
+              bodyStyle={{ padding: "24px" }}
             >
               <div
                 ref={networkRef}
                 style={{
                   width: "100%",
-                  height: "600px",
-                  background: "#f8fafc",
+                  height: window.innerWidth > 1200 ? "600px" : "400px",
+                  border: "2px solid #f0f0f0",
+                  borderRadius: "12px",
+                  background: "#fafafa",
                 }}
               />
             </Card>
@@ -388,79 +339,119 @@ const NetworkPage: React.FC = () => {
             {/* 关系列表 */}
             <Card
               title={
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Users size={20} style={{ color: "#667eea" }} />
-                  <span>相关人物</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <User size={24} style={{ color: "#667eea" }} />
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #667eea, #764ba2)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      fontSize: "20px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    关系列表
+                  </span>
                 </div>
               }
               style={{
+                flex: window.innerWidth > 1200 ? "1" : "1",
                 background:
                   "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)",
-                overflow: "hidden",
               }}
-              bodyStyle={{ padding: "16px" }}
+              bodyStyle={{ padding: "24px" }}
             >
-              {relatedPeople.length > 0 ? (
+              {relationships.length > 0 ? (
                 <List
-                  dataSource={relatedPeople}
-                  renderItem={({ relationship, person }) => (
-                    <List.Item
-                      style={{
-                        cursor: "pointer",
-                        padding: "12px",
-                        borderRadius: "8px",
-                        marginBottom: "8px",
-                        transition: "all 0.3s ease",
-                        background: "rgba(255, 255, 255, 0.5)",
-                      }}
-                      onClick={() => handlePersonClick(person!.id)}
-                      className="bounce-hover"
-                    >
-                      <div style={{ width: "100%" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "8px",
-                          }}
-                        >
+                  dataSource={relationships}
+                  renderItem={(rel: Relationship) => {
+                    const targetPersonId =
+                      rel.person1Id === person.id
+                        ? rel.person2Id
+                        : rel.person1Id;
+                    const targetPerson = people.find(
+                      p => p.id === targetPersonId
+                    );
+
+                    return (
+                      <List.Item
+                        onClick={() => handlePersonClick(targetPersonId)}
+                        style={{
+                          cursor: "pointer",
+                          borderRadius: "12px",
+                          padding: "16px",
+                          marginBottom: "8px",
+                          background: "rgba(255, 255, 255, 0.6)",
+                          border: "1px solid rgba(102, 126, 234, 0.1)",
+                          transition: "all 0.3s ease",
+                        }}
+                        className="bounce-hover"
+                      >
+                        <div style={{ width: "100%" }}>
                           <div
                             style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
-                              background: "linear-gradient(135deg, #4ecdc4, #44a08d)",
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "center",
+                              gap: "12px",
+                              marginBottom: "8px",
                             }}
                           >
-                            <User size={20} color="white" />
-                          </div>
-                          <div style={{ flex: 1 }}>
                             <div
                               style={{
-                                fontWeight: 600,
-                                color: "#2c3e50",
-                                fontSize: "16px",
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                background:
+                                  "linear-gradient(135deg, #667eea, #764ba2)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
                               }}
                             >
-                              {person!.name}
+                              <User size={20} color="white" />
                             </div>
-                            <div style={{ color: "#667eea", fontSize: "14px" }}>
-                              {relationship.description}
+                            <div style={{ flex: 1 }}>
+                              <Title
+                                level={5}
+                                style={{ margin: 0, color: "#2c3e50" }}
+                              >
+                                {targetPerson?.name || "未知"}
+                              </Title>
+                              <Text
+                                style={{ color: "#667eea", fontSize: "14px" }}
+                              >
+                                {targetPerson?.dynasty} ·{" "}
+                                {targetPerson?.occupation}
+                              </Text>
                             </div>
                           </div>
+                          <Text
+                            style={{
+                              fontSize: "14px",
+                              color: "#666",
+                              lineHeight: "1.5",
+                            }}
+                          >
+                            关系：{rel.description}
+                          </Text>
                         </div>
-                      </div>
-                    </List.Item>
-                  )}
+                      </List.Item>
+                    );
+                  }}
                 />
               ) : (
-                <div style={{ textAlign: "center", padding: "40px 20px" }}>
-                  <Users size={48} style={{ color: "#ccc", marginBottom: "16px" }} />
-                  <Text style={{ color: "#999" }}>暂无关系数据</Text>
+                <div style={{ textAlign: "center", padding: "40px" }}>
+                  <Text style={{ fontSize: "16px", color: "#999" }}>
+                    暂无关系数据
+                  </Text>
                 </div>
               )}
             </Card>

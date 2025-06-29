@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Timeline, Card, Typography, Button, Space, Tag } from "antd";
 import {
   ArrowLeft,
@@ -11,7 +11,7 @@ import {
   Network,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getPersonById, getPersonTimeline } from "../data/mockData";
+import { getPersonById, getPersonTimeline } from "../services/api";
 import type { TimelineEvent } from "../types/index";
 
 const { Title, Text } = Typography;
@@ -70,8 +70,31 @@ const getEventLabel = (type: TimelineEvent["type"]) => {
 const TimelinePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const person = id ? getPersonById(id) : null;
-  const timeline = id ? getPersonTimeline(id) : [];
+  const [person, setPerson] = useState<any>(null);
+  const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!id) return;
+
+      setLoading(true);
+      try {
+        const [personData, timelineData] = await Promise.all([
+          getPersonById(id),
+          getPersonTimeline(id),
+        ]);
+        setPerson(personData);
+        setTimeline(timelineData);
+      } catch (error) {
+        console.error("加载数据失败:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [id]);
 
   if (!person) {
     return (
